@@ -158,20 +158,29 @@ export class App implements OnInit, OnDestroy {
       return;
     }
     const admin = this.currentAdmin();
-    const app: Application = {
-      id: Date.now(), type: v.type, name: target, amount: v.amount,
-      reason: (v.reason as string).trim(), status: 'pending',
-      approvals: admin ? [admin] : [], submitted_by: admin ?? 'standard_user',
+    const appData = {
+      type: v.type as ('increment' | 'decrement'),
+      name: target,
+      amount: v.amount as number,
+      reason: (v.reason as string).trim(),
+      status: 'pending',
+      approvals: admin ? [admin] : [],
+      submitted_by: admin ?? 'standard_user',
       timestamp: Date.now(),
     };
     if (this.supabaseReady) {
-      const { error } = await this.supabase.from('applications').insert([app]);
-      if (error) { console.error('[ROTI_NEXUS] insert failed:', error); alert('Failed. Check console.'); return; }
+      const { error } = await this.supabase.from('applications').insert([appData]);
+      if (error) {
+        console.error('[ROTI_NEXUS] insert failed:', error.message, error.details, error.hint);
+        alert('Submit failed: ' + error.message);
+        return;
+      }
     } else {
-      this.applications.update(a => [...a, app]);
+      this.applications.update(a => [...a, { id: Date.now(), ...appData }]);
     }
     this.showAppForm.set(false);
     this.appForm.reset({ type: 'increment', amount: 1 });
+    await this.fetchAll();
     this.cdr.markForCheck();
   }
 
@@ -190,7 +199,6 @@ export class App implements OnInit, OnDestroy {
         await this.supabase.from('applications').delete().eq('id', app.id);
         const verb = app.type === 'increment' ? 'Incremented' : 'Decremented';
         await this.supabase.from('logs').insert([{
-          id: Date.now(),
           message: '[APPROVED] ' + verb + ' ' + app.name.toUpperCase() + ' by ' + app.amount + '. By: ' + newApprovals.join(', ') + '. Reason: ' + app.reason,
           status: 'approved', timestamp: Date.now(),
         }]);
@@ -218,7 +226,6 @@ export class App implements OnInit, OnDestroy {
       await this.supabase.from('applications').delete().eq('id', app.id);
       const verb = app.type === 'increment' ? 'Increment' : 'Decrement';
       await this.supabase.from('logs').insert([{
-        id: Date.now(),
         message: '[REJECTED] ' + verb + ' for ' + app.name.toUpperCase() + ' (+/-' + app.amount + ') by Admin ' + admin + '. Reason: ' + app.reason,
         status: 'rejected', timestamp: Date.now(),
       }]);
