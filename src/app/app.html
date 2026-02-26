@@ -1,0 +1,265 @@
+<div class="min-h-screen relative bg-[#050505] text-white font-sans selection:bg-[#00f3ff] selection:text-black pb-20">
+  <!-- Scanlines & Grid -->
+  <div class="scanlines"></div>
+  <div class="fixed inset-0 z-0 pointer-events-none">
+    <div class="absolute inset-0 bg-grid opacity-30"></div>
+    <div class="absolute inset-0 bg-gradient-to-b from-transparent via-[#050505]/80 to-[#050505]"></div>
+  </div>
+
+  <!-- Content -->
+  <div class="relative z-10 flex flex-col min-h-screen">
+    
+    <!-- Navbar -->
+    <nav class="flex items-center justify-between px-8 py-6 border-b border-white/5 backdrop-blur-md bg-[#050505]/50 sticky top-0 z-40">
+      <div class="flex items-center gap-2">
+        <span class="text-2xl font-bold tracking-widest text-[#00f3ff] drop-shadow-[0_0_8px_rgba(0,243,255,0.5)]">ROTI_NEXUS</span>
+      </div>
+      
+      <div class="flex items-center gap-4">
+        @if (isAdmin()) {
+          <span class="font-mono text-xs text-[#ff00ff] border border-[#ff00ff]/30 px-3 py-1 rounded bg-[#ff00ff]/10">
+            LOGGED IN AS: {{currentAdmin()}}
+          </span>
+        }
+        
+        @if (!isAdmin()) {
+          <button (click)="toggleAdminLogin()" class="px-6 py-2 font-mono text-xs tracking-widest rounded-sm btn-glow-magenta uppercase cursor-pointer flex items-center gap-2">
+            <mat-icon class="text-[16px] w-4 h-4">admin_panel_settings</mat-icon> Admin Access
+          </button>
+        } @else {
+          <button (click)="logout()" class="px-6 py-2 font-mono text-xs tracking-widest rounded-sm btn-glow-cyan uppercase cursor-pointer flex items-center gap-2">
+            <mat-icon class="text-[16px] w-4 h-4">logout</mat-icon> Disconnect
+          </button>
+        }
+      </div>
+    </nav>
+
+    <main class="flex-grow flex flex-col items-center w-full max-w-7xl mx-auto px-6 py-12">
+      
+      <!-- Header -->
+      <div class="text-center mb-16 mt-8">
+        <div class="font-mono text-xs tracking-[0.2em] text-[#00f3ff] mb-4 drop-shadow-[0_0_5px_rgba(0,243,255,0.5)]">
+          // ACTIVE PROTOCOL: ROTI DECIDER
+        </div>
+        <h1 class="text-5xl md:text-7xl font-bold tracking-tighter mb-6 text-gradient">
+          INCREMENT COUNTER
+        </h1>
+        <p class="text-gray-400 font-mono text-sm max-w-2xl mx-auto">
+          Live tracking of all entity consumption metrics. Standard users must submit an application to modify values or register new users. 3 Admin approvals required.
+        </p>
+      </div>
+
+      <!-- Counters List (Ranked in one column) -->
+      <div class="flex flex-col gap-4 w-full max-w-4xl mx-auto mb-16 mt-4">
+        @for (person of rankedCounters(); track person.name; let i = $index) {
+          <div class="cyber-card p-4 md:p-6 rounded-lg flex flex-col md:flex-row items-center justify-between relative group"
+               [class.border-[#ffd700]]="i === 0" [class.shadow-[0_0_15px_rgba(255,215,0,0.2)]]="i === 0"
+               [class.border-[#c0c0c0]]="i === 1" [class.shadow-[0_0_15px_rgba(192,192,192,0.2)]]="i === 1"
+               [class.border-[#cd7f32]]="i === 2" [class.shadow-[0_0_15px_rgba(205,127,50,0.2)]]="i === 2">
+            
+            <div class="flex items-center gap-4 w-full md:w-auto mb-4 md:mb-0">
+              <div class="text-2xl font-bold text-gray-600 w-8 text-center"
+                   [class.text-[#ffd700]]="i === 0"
+                   [class.text-[#c0c0c0]]="i === 1"
+                   [class.text-[#cd7f32]]="i === 2">#{{i + 1}}</div>
+              <div class="text-lg md:text-xl font-mono tracking-widest uppercase">{{person.name}}</div>
+              
+              @if (i === 0) { <div class="hidden md:block bg-[#ffd700] text-black text-[10px] font-bold px-2 py-1 rounded-sm shadow-[0_0_10px_#ffd700] whitespace-nowrap ml-2">🥇 GOLD - GIVES ROTI</div> }
+              @if (i === 1) { <div class="hidden md:block bg-[#c0c0c0] text-black text-[10px] font-bold px-2 py-1 rounded-sm shadow-[0_0_10px_#c0c0c0] whitespace-nowrap ml-2">🥈 SILVER - GIVES ROTI</div> }
+              @if (i === 2) { <div class="hidden md:block bg-[#cd7f32] text-white text-[10px] font-bold px-2 py-1 rounded-sm shadow-[0_0_10px_#cd7f32] whitespace-nowrap ml-2">🥉 BRONZE - GIVES ROTI</div> }
+            </div>
+
+            <!-- Mobile Badges -->
+            @if (i === 0) { <div class="md:hidden bg-[#ffd700] text-black text-[10px] font-bold px-2 py-1 rounded-sm shadow-[0_0_10px_#ffd700] whitespace-nowrap mb-4">🥇 GOLD - GIVES ROTI</div> }
+            @if (i === 1) { <div class="md:hidden bg-[#c0c0c0] text-black text-[10px] font-bold px-2 py-1 rounded-sm shadow-[0_0_10px_#c0c0c0] whitespace-nowrap mb-4">🥈 SILVER - GIVES ROTI</div> }
+            @if (i === 2) { <div class="md:hidden bg-[#cd7f32] text-white text-[10px] font-bold px-2 py-1 rounded-sm shadow-[0_0_10px_#cd7f32] whitespace-nowrap mb-4">🥉 BRONZE - GIVES ROTI</div> }
+
+            <div class="flex items-center gap-6 w-full md:w-auto justify-between md:justify-end">
+              <div class="text-4xl md:text-5xl font-bold text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]"
+                   [class.text-[#ffd700]]="i === 0"
+                   [class.text-[#c0c0c0]]="i === 1"
+                   [class.text-[#cd7f32]]="i === 2">{{person.count}}</div>
+              
+              @if (isAdmin()) {
+                <div class="flex gap-2">
+                  <button (click)="adminDirectUpdate(person.name, -1)" class="w-10 h-10 flex items-center justify-center border border-[#ff00ff]/50 text-[#ff00ff] hover:bg-[#ff00ff]/20 transition-colors rounded font-mono text-2xl">-</button>
+                  <button (click)="adminDirectUpdate(person.name, 1)" class="w-10 h-10 flex items-center justify-center border border-[#00f3ff]/50 text-[#00f3ff] hover:bg-[#00f3ff]/20 transition-colors rounded font-mono text-2xl">+</button>
+                </div>
+              }
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- Standard User Action -->
+      @if (!isAdmin()) {
+        <div class="flex justify-center w-full mb-24">
+          <button (click)="toggleAppForm()" class="px-8 py-4 font-mono text-sm tracking-widest rounded-sm btn-glow-cyan uppercase cursor-pointer flex items-center gap-3">
+            <mat-icon>description</mat-icon> Submit Update / New User Application
+          </button>
+        </div>
+      }
+
+      <!-- Admin Dashboard & Logs -->
+      <div class="w-full border-t border-white/10 pt-16 mt-8">
+        
+        @if (isAdmin()) {
+          <div class="font-mono text-xs tracking-[0.2em] text-[#ff00ff] mb-8 drop-shadow-[0_0_5px_rgba(255,0,255,0.5)] flex items-center gap-4">
+            <span class="w-8 h-[1px] bg-[#ff00ff]/50"></span>
+            // ADMIN DASHBOARD
+            <span class="w-8 h-[1px] bg-[#ff00ff]/50"></span>
+          </div>
+
+          <!-- Pending Applications -->
+          <div class="cyber-card p-8 rounded-lg w-full mb-8">
+            <h3 class="text-xl font-bold mb-6 tracking-wide text-[#ff00ff]">PENDING APPLICATIONS ({{applications().length}})</h3>
+            
+            @if (applications().length === 0) {
+              <div class="text-gray-500 font-mono text-sm italic py-8 text-center border border-dashed border-white/10">
+                No pending applications in the queue.
+              </div>
+            } @else {
+              <div class="flex flex-col gap-4">
+                @for (app of applications(); track app.id) {
+                  <div class="bg-black/40 border border-white/5 p-4 rounded flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div class="flex-grow">
+                      <div class="flex items-center gap-3 mb-2">
+                        <span class="font-bold text-lg uppercase">{{app.name}}</span>
+                        <span class="px-2 py-0.5 bg-[#00f3ff]/10 text-[#00f3ff] border border-[#00f3ff]/30 text-xs font-mono rounded uppercase"
+                              [class.text-[#ff00ff]]="app.type === 'decrement'"
+                              [class.border-[#ff00ff]]="app.type === 'decrement'"
+                              [class.bg-[#ff00ff]/10]="app.type === 'decrement'">
+                          {{app.type === 'new_user' ? 'NEW USER' : app.type === 'decrement' ? 'DECREMENT' : 'INCREMENT'}} ({{app.type === 'decrement' ? '-' : '+'}}{{app.amount}})
+                        </span>
+                      </div>
+                      <div class="text-gray-400 text-sm font-mono mb-3">
+                        <span class="text-gray-600">REASON:</span> {{app.reason}}
+                      </div>
+                      
+                      <!-- Approval Progress -->
+                      <div class="flex flex-col gap-1">
+                        <div class="flex items-center gap-2">
+                          <div class="h-1.5 w-32 bg-black/50 rounded-full overflow-hidden border border-white/10">
+                            <div class="h-full bg-[#00f3ff] transition-all" [style.width]="(app.approvals.length / 3) * 100 + '%'"></div>
+                          </div>
+                          <span class="font-mono text-[10px] text-[#00f3ff]">{{app.approvals.length}}/3 APPROVALS</span>
+                        </div>
+                        @if (app.approvals.length > 0) {
+                          <div class="flex gap-1 mt-1">
+                            @for (admin of app.approvals; track admin) {
+                              <span class="px-1.5 py-0.5 bg-white/10 text-white text-[9px] rounded font-mono">{{admin}}</span>
+                            }
+                          </div>
+                        }
+                      </div>
+                    </div>
+
+                    <div class="flex gap-2 shrink-0 mt-4 md:mt-0">
+                      <button (click)="approveApplication(app)" [disabled]="hasApproved(app)" class="px-4 py-2 bg-[#00f3ff]/10 text-[#00f3ff] border border-[#00f3ff]/50 hover:bg-[#00f3ff]/20 font-mono text-xs tracking-wider rounded transition-colors flex items-center gap-1 disabled:opacity-30 disabled:cursor-not-allowed">
+                        <mat-icon class="text-[16px] w-4 h-4">check</mat-icon> {{ hasApproved(app) ? 'APPROVED' : 'APPROVE' }}
+                      </button>
+                      <button (click)="rejectApplication(app)" class="px-4 py-2 bg-[#ff00ff]/10 text-[#ff00ff] border border-[#ff00ff]/50 hover:bg-[#ff00ff]/20 font-mono text-xs tracking-wider rounded transition-colors flex items-center gap-1">
+                        <mat-icon class="text-[16px] w-4 h-4">close</mat-icon> REJECT
+                      </button>
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        }
+
+        <!-- System Logs (Visible to everyone) -->
+        <div class="font-mono text-xs tracking-[0.2em] text-[#00f3ff] mb-8 drop-shadow-[0_0_5px_rgba(0,243,255,0.5)] flex items-center gap-4">
+          <span class="w-8 h-[1px] bg-[#00f3ff]/50"></span>
+          // SYSTEM LOGS
+          <span class="w-8 h-[1px] bg-[#00f3ff]/50"></span>
+        </div>
+        
+        <div class="cyber-card p-6 rounded-lg w-full">
+          <div class="flex flex-col gap-2 max-h-80 overflow-y-auto pr-2">
+            @for (log of logs(); track log.id) {
+              <div class="font-mono text-xs p-3 border-l-2 bg-black/40"
+                   [class.border-[#00f3ff]]="log.status === 'approved'"
+                   [class.text-[#00f3ff]]="log.status === 'approved'"
+                   [class.border-[#ff00ff]]="log.status === 'rejected'"
+                   [class.text-[#ff00ff]]="log.status === 'rejected'">
+                <span class="opacity-50 mr-2 text-white">[{{log.timestamp | date:'shortTime'}}]</span>
+                {{log.message}}
+              </div>
+            }
+            @if (logs().length === 0) {
+              <div class="text-gray-500 font-mono text-sm italic text-center py-4">No logs recorded yet.</div>
+            }
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- Modals -->
+  
+  <!-- Admin Login Modal -->
+  @if (showAdminLogin()) {
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+      <div class="cyber-card p-8 rounded-xl w-full max-w-md relative border-[#ff00ff]/30">
+        <button (click)="toggleAdminLogin()" class="absolute top-4 right-4 text-gray-500 hover:text-white">
+          <mat-icon>close</mat-icon>
+        </button>
+        <h2 class="text-2xl font-bold mb-6 text-[#ff00ff] tracking-widest">ADMIN_AUTH</h2>
+        <p class="text-gray-400 font-mono text-xs mb-6">Enter one of the 3 admin passwords.</p>
+        <form [formGroup]="loginForm" (ngSubmit)="attemptLogin()" class="flex flex-col gap-6">
+          <div>
+            <label class="block font-mono text-xs text-gray-400 mb-2">ACCESS KEY</label>
+            <input type="password" formControlName="password" class="w-full bg-black/50 border border-[#ff00ff]/30 focus:border-[#ff00ff] text-white px-4 py-3 font-mono outline-none transition-colors" placeholder="Enter password...">
+          </div>
+          <button type="submit" [disabled]="!loginForm.valid" class="w-full py-4 font-mono text-sm tracking-widest rounded-sm btn-glow-magenta uppercase cursor-pointer disabled:opacity-50">
+            Authenticate
+          </button>
+        </form>
+      </div>
+    </div>
+  }
+
+  <!-- Application Modal -->
+  @if (showAppForm()) {
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+      <div class="cyber-card p-8 rounded-xl w-full max-w-lg relative border-[#00f3ff]/30">
+        <button (click)="toggleAppForm()" class="absolute top-4 right-4 text-gray-500 hover:text-white">
+          <mat-icon>close</mat-icon>
+        </button>
+        <h2 class="text-2xl font-bold mb-2 text-[#00f3ff] tracking-widest">SUBMIT_APPLICATION</h2>
+        <p class="text-gray-400 font-mono text-xs mb-6">Requires 3 Admin approvals to execute.</p>
+        
+        <form [formGroup]="appForm" (ngSubmit)="submitApplication()" class="flex flex-col gap-5">
+          <div>
+            <label class="block font-mono text-xs text-gray-400 mb-2">REQUEST TYPE</label>
+            <select formControlName="type" class="w-full bg-black/50 border border-[#00f3ff]/30 focus:border-[#00f3ff] text-white px-4 py-3 font-mono text-sm outline-none transition-colors appearance-none">
+              <option value="increment">Increment Existing User</option>
+              <option value="decrement">Decrement Existing User</option>
+              <option value="new_user">Register New User</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-mono text-xs text-gray-400 mb-2">TARGET ENTITY (NAME)</label>
+            <input type="text" formControlName="name" class="w-full bg-black/50 border border-[#00f3ff]/30 focus:border-[#00f3ff] text-white px-4 py-3 font-mono text-sm outline-none transition-colors" placeholder="e.g. ali">
+          </div>
+          <div>
+            <label class="block font-mono text-xs text-gray-400 mb-2">AMOUNT / INITIAL COUNT</label>
+            <input type="number" formControlName="amount" class="w-full bg-black/50 border border-[#00f3ff]/30 focus:border-[#00f3ff] text-white px-4 py-3 font-mono text-sm outline-none transition-colors" min="1">
+          </div>
+          <div>
+            <label class="block font-mono text-xs text-gray-400 mb-2">JUSTIFICATION / REASON</label>
+            <textarea formControlName="reason" rows="3" class="w-full bg-black/50 border border-[#00f3ff]/30 focus:border-[#00f3ff] text-white px-4 py-3 font-mono text-sm outline-none transition-colors resize-none" placeholder="Provide a detailed reason..."></textarea>
+          </div>
+          <button type="submit" [disabled]="!appForm.valid" class="w-full mt-2 py-4 font-mono text-sm tracking-widest rounded-sm btn-glow-cyan uppercase cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
+            Transmit Request
+          </button>
+        </form>
+      </div>
+    </div>
+  }
+
+</div>
+<router-outlet></router-outlet>

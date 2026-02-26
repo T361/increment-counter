@@ -1,0 +1,101 @@
+@import url('https://fonts.googleapis.com/icon?family=Material+Icons');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  
+  --color-cyber-bg: #050505;
+  --color-cyber-cyan: #00f3ff;
+  --color-cyber-magenta: #ff00ff;
+  --color-cyber-blue: #0066ff;
+  --color-cyber-dark: #0a0a0c;
+  --color-cyber-card: #111116;
+}
+
+body {
+  background-color: var(--color-cyber-bg);
+  color: white;
+  font-family: var(--font-sans);
+  overflow-x: hidden;
+}
+
+/* Grid Background */
+.bg-grid {
+  background-size: 40px 40px;
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent);
+}
+
+/* Gradient Text */
+.text-gradient {
+  background: linear-gradient(to right, var(--color-cyber-magenta), var(--color-cyber-cyan));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.text-gradient-cyan-blue {
+  background: linear-gradient(to right, var(--color-cyber-cyan), var(--color-cyber-blue));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Glowing Buttons */
+.btn-glow-cyan {
+  border: 1px solid var(--color-cyber-cyan);
+  color: var(--color-cyber-cyan);
+  box-shadow: 0 0 10px rgba(0, 243, 255, 0.2), inset 0 0 10px rgba(0, 243, 255, 0.1);
+  transition: all 0.3s ease;
+  background: transparent;
+}
+.btn-glow-cyan:hover {
+  box-shadow: 0 0 20px rgba(0, 243, 255, 0.4), inset 0 0 20px rgba(0, 243, 255, 0.2);
+  background-color: rgba(0, 243, 255, 0.1);
+}
+
+.btn-glow-magenta {
+  border: 1px solid var(--color-cyber-magenta);
+  color: var(--color-cyber-magenta);
+  box-shadow: 0 0 10px rgba(255, 0, 255, 0.2), inset 0 0 10px rgba(255, 0, 255, 0.1);
+  transition: all 0.3s ease;
+  background: transparent;
+}
+.btn-glow-magenta:hover {
+  box-shadow: 0 0 20px rgba(255, 0, 255, 0.4), inset 0 0 20px rgba(255, 0, 255, 0.2);
+  background-color: rgba(255, 0, 255, 0.1);
+}
+
+/* Glassmorphic Cards */
+.cyber-card {
+  background: rgba(17, 17, 22, 0.7);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+}
+.cyber-card:hover {
+  border-color: rgba(0, 243, 255, 0.5);
+  box-shadow: 0 0 20px rgba(0, 243, 255, 0.1);
+  transform: translateY(-2px);
+}
+.cyber-card-magenta:hover {
+  border-color: rgba(255, 0, 255, 0.5);
+  box-shadow: 0 0 20px rgba(255, 0, 255, 0.1);
+}
+
+/* Scanline effect */
+.scanlines {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.1));
+  background-size: 100% 4px;
+  pointer-events: none;
+  z-index: 50;
+  opacity: 0.3;
+}
