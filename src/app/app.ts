@@ -67,6 +67,7 @@ export class App implements OnInit, OnDestroy {
   supabaseReady = false;
   private supabase!: SupabaseClient;
   private channel: RealtimeChannel | null = null;
+  processing = signal(false);
 
   constructor(private fb: FormBuilder, private cdr: ChangeDetectorRef) {
     this.loginForm = this.fb.group({ password: ['', Validators.required] });
@@ -150,11 +151,15 @@ export class App implements OnInit, OnDestroy {
   logout(): void { this.currentAdmin.set(null); this.cdr.markForCheck(); }
 
   async submitApplication(): Promise<void> {
-    if (!this.appForm.valid) return;
+    if (!this.appForm.valid || this.processing()) return;
+    this.processing.set(true);
+    this.cdr.markForCheck();
     const v = this.appForm.value;
     const target = (v.name as string).toLowerCase().trim();
     if (!this.counters().some(c => c.name === target)) {
       alert('Entity "' + target + '" not found. No new users can be added.');
+      this.processing.set(false);
+      this.cdr.markForCheck();
       return;
     }
     const admin = this.currentAdmin();
@@ -171,23 +176,31 @@ export class App implements OnInit, OnDestroy {
     if (this.supabaseReady) {
       const { error } = await this.supabase.from('applications').insert([appData]);
       if (error) {
-        console.error('[ROTI_NEXUS] insert failed:', error.message, error.details, error.hint);
+        console.error('[ROTI_NEXUS] insert failed:', error.message);
         alert('Submit failed: ' + error.message);
+        this.processing.set(false);
+        this.cdr.markForCheck();
         return;
       }
+      await this.fetchAll();
     } else {
       this.applications.update(a => [...a, { id: Date.now(), ...appData }]);
     }
     this.showAppForm.set(false);
     this.appForm.reset({ type: 'increment', amount: 1 });
-    await this.fetchAll();
+    this.processing.set(false);
     this.cdr.markForCheck();
   }
 
   async approveApplication(app: Application): Promise<void> {
     const admin = this.currentAdmin();
-    if (!admin || app.approvals.includes(admin)) return;
-    const newApprovals = [...app.approvals, admin];
+    if (!admin || this.processing()) return;
+    const approvals: string[] = Array.isArray(app.approvals) ? app.approvals : [];
+    if (approvals.indexOf(admin) !== -1) return;
+    this.processing.set(true);
+    const newApprovals = [...approvals, admin];
+    this.applications.update(a => a.map(x => x.id === app.id ? { ...x, approvals: newApprovals } : x));
+    this.cdr.markForCheck();
 
     if (newApprovals.length >= 3) {
       if (this.supabaseReady) {
@@ -202,6 +215,7 @@ export class App implements OnInit, OnDestroy {
           message: '[APPROVED] ' + verb + ' ' + app.name.toUpperCase() + ' by ' + app.amount + '. By: ' + newApprovals.join(', ') + '. Reason: ' + app.reason,
           status: 'approved', timestamp: Date.now(),
         }]);
+        await this.fetchAll();
       } else {
         const delta = app.type === 'decrement' ? -app.amount : app.amount;
         this.counters.update(cs => cs.map(c => c.name === app.name ? { ...c, count: Math.max(0, c.count + delta) } : c));
@@ -212,16 +226,22 @@ export class App implements OnInit, OnDestroy {
     } else {
       if (this.supabaseReady) {
         await this.supabase.from('applications').update({ approvals: newApprovals }).eq('id', app.id);
+        await this.fetchAll();
       } else {
         this.applications.update(a => a.map(x => x.id === app.id ? { ...x, approvals: newApprovals } : x));
       }
     }
+    this.processing.set(false);
     this.cdr.markForCheck();
   }
 
   async rejectApplication(app: Application): Promise<void> {
     const admin = this.currentAdmin();
-    if (!admin) return;
+    if (!admin || this.processing()) return;
+    this.processing.set(true);
+    this.applications.update(a => a.filter(x => x.id !== app.id));
+    this.cdr.markForCheck();
+
     if (this.supabaseReady) {
       await this.supabase.from('applications').delete().eq('id', app.id);
       const verb = app.type === 'increment' ? 'Increment' : 'Decrement';
@@ -229,17 +249,20 @@ export class App implements OnInit, OnDestroy {
         message: '[REJECTED] ' + verb + ' for ' + app.name.toUpperCase() + ' (+/-' + app.amount + ') by Admin ' + admin + '. Reason: ' + app.reason,
         status: 'rejected', timestamp: Date.now(),
       }]);
+      await this.fetchAll();
     } else {
-      this.applications.update(a => a.filter(x => x.id !== app.id));
       const verb = app.type === 'increment' ? 'Increment' : 'Decrement';
       this.logs.update(l => [{ id: Date.now(), message: '[REJECTED] ' + verb + ' for ' + app.name.toUpperCase() + ' (+/-' + app.amount + ') by Admin ' + admin + '. Reason: ' + app.reason, status: 'rejected', timestamp: Date.now() }, ...l]);
     }
+    this.processing.set(false);
     this.cdr.markForCheck();
   }
 
   hasApproved(app: Application): boolean {
     const a = this.currentAdmin();
-    return a ? app.approvals.includes(a) : false;
+    if (!a) return false;
+    const approvals: string[] = Array.isArray(app.approvals) ? app.approvals : [];
+    return approvals.indexOf(a) !== -1;
   }
 
   getRankBadge(idx: number): string {
